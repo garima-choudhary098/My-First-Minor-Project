@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess The Number</title>
+    <link rel="stylesheet" href="game.css"> 
+</head>
+<body>
+
+    <div class="container">
+        <h1>Guess The Number! 🧐</h1>
+        <p>I'm thinking of a number between 1 and 100. You have 7 attempts!</p>
+
+        <div id="attempts-left">Attempts Left: 7</div>
+
+        <div class="input-group">
+            <input type="number" id="guessInput" min="1" max="100" placeholder="Enter guess" autofocus>
+            <button id="submitButton">Guess</button>
+        </div>
+        
+        <div id="message">Enter your guess above!</div>
+        <button id="resetButton">Play Again</button>
+    </div>
+    <script>
+    // --- JavaScript for Game Logic ---
+
+// 1. Game Configuration
+const MAX_ATTEMPTS = 7; 
+
+// 2. DOM Elements (Ensure these IDs match your HTML)
+const guessInput = document.getElementById('guessInput');
+const submitButton = document.getElementById('submitButton');
+const messageDisplay = document.getElementById('message');
+const resetButton = document.getElementById('resetButton');
+const attemptsDisplay = document.getElementById('attempts-left');
+
+// 3. Game State Variables
+let secretNumber;
+let attempts;
+
+// Function to initialize or reset the game
+function resetGame() {
+    // Generate a new number between 1 and 100 (inclusive)
+    secretNumber = Math.floor(Math.random() * 100) + 1;
+    attempts = MAX_ATTEMPTS;
+    
+    // Reset DOM elements and state
+    messageDisplay.textContent = 'Enter your guess above!';
+    messageDisplay.style.color = '#333';
+    attemptsDisplay.textContent = `Attempts Left: ${attempts}`;
+    
+    guessInput.value = '';
+    guessInput.disabled = false;
+    submitButton.disabled = false;
+    resetButton.style.display = 'none';
+    
+    guessInput.focus();
+}
+
+function endGame() {
+    // Disable further guessing
+    guessInput.disabled = true;
+    submitButton.disabled = true;
+    
+    // Show the reset button
+    resetButton.style.display = 'block';
+}
+
+function checkGuess() {
+    // Prevent function from running if game is over
+    if (attempts <= 0 || guessInput.disabled) return; 
+
+    // Get user input and convert to a number
+    const userGuess = parseInt(guessInput.value);
+
+    // Basic input validation
+    if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+        messageDisplay.textContent = "⚠️ Please enter a number between 1 and 100.";
+        messageDisplay.style.color = "orange";
+        // Do not decrement attempts on invalid input
+        return; 
+    }
+
+    attempts--; // Decrement attempt count
+
+    // 4. Game Logic
+    if (userGuess === secretNumber) {
+        // Winning Condition
+        messageDisplay.textContent = `🎉 YOU WIN! The number was ${secretNumber} in ${MAX_ATTEMPTS - attempts} attempts!`;
+        messageDisplay.style.color = "green";
+        endGame();
+    } else {
+        // Not a win, check higher/lower
+        let hint = userGuess < secretNumber ? "Too low! ⬇️" : "Too high! ⬆️";
+        messageDisplay.textContent = `${hint} Guess again!`;
+        messageDisplay.style.color = "#a00"; // Dark red
+
+        // Check for loss condition
+        if (attempts === 0) {
+            messageDisplay.textContent = `❌ GAME OVER! The number was ${secretNumber}.`;
+            endGame();
+        }
+    }
+    
+    // Update attempts display and clear input
+    attemptsDisplay.textContent = `Attempts Left: ${attempts}`;
+    guessInput.value = '';
+    
+    // Refocus input only if game is still active
+    if (attempts > 0 && !guessInput.disabled) {
+        guessInput.focus();
+    }
+}
+
+// 5. Event Listeners (Connectivity between JS and HTML actions)
+document.addEventListener('DOMContentLoaded', resetGame); // Start the game when the page loads
+
+submitButton.addEventListener('click', checkGuess); // Run checkGuess when the "Guess" button is clicked
+resetButton.addEventListener('click', resetGame); // Run resetGame when the "Play Again" button is clicked
+
+// Allow pressing Enter key to submit guess
+guessInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent default form submission if input was in a form
+        checkGuess();
+    }
+});
+</script>
+    </body>
+</html>
